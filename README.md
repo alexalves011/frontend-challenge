@@ -1,100 +1,114 @@
 # Kurio NFT Marketplace
 
-Marketplace de NFTs para colecionadores: descobrir, cotar e comprar com carteira simulada — **sem blockchain real**, com um backend inteiro rodando no navegador.
-
-O cliente trata a API como autoridade. Preços, taxas, cupons e totais nunca são recalculados na UI. Pedidos usam `Idempotency-Key`. Eventos de preço e pagamento chegam por Socket.IO, com deduplicação e rejeição de versões obsoletas.
-
+[![Deploy na Vercel](https://img.shields.io/badge/Deploy-Vercel-black?style=for-the-badge&logo=vercel&logoColor=white)](https://frontend-challenge-umber-delta.vercel.app/)
 [![React](https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![MSW](https://img.shields.io/badge/MSW-FF6A33?style=for-the-badge&logo=testinglibrary&logoColor=white)](https://mswjs.io)
 [![Zod](https://img.shields.io/badge/Zod-3E67B1?style=for-the-badge&logo=zod&logoColor=white)](https://zod.dev)
-[![React Hook Form](https://img.shields.io/badge/React_Hook_Form-EC5990?style=for-the-badge&logo=reacthookform&logoColor=white)](https://react-hook-form.com)
 [![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)](https://playwright.dev)
 
-Também no núcleo: **TanStack Router**, **TanStack Query**, **Axios**, **Socket.IO**, **shadcn/ui** e **Vite**.
+Marketplace de NFTs em React + TypeScript desenvolvido como solução para o **desafio técnico da Jungle Gaming**. O projeto simula um ecossistema completo de criptoativos e colecionadores — **sem blockchain real**, contando com um backend robusto rodando inteiramente no navegador via MSW (Mock Service Worker).
+
+👉 **[Acesse a aplicação em produção na Vercel](https://frontend-challenge-umber-delta.vercel.app/)**
+
+> Layout fiel ao Figma do desafio. O escopo original está detalhado em [`CHALLENGE.md`](./CHALLENGE.md).
 
 ---
 
-## Engenharia em evidência
+## 📋 Requisitos Atendidos
 
-| Problema | Solução |
+A aplicação cobre 100% dos fluxos exigidos no desafio, garantindo robustez de dados e excelente experiência de usuário:
+
+- **Catálogo Dinâmico** — Busca, filtros combináveis na URL, ordenação e paginação, com estados de loading, vazio e tratamento de erro.
+- **Detalhes do NFT** — Galeria interativa, controle de quantidade baseado em estoque real, favoritos e ações de compra.
+- **Carrinho Inteligente** — Gestão de itens, aplicação de cupons de desconto (`KURIO10` / `EXPIRADO`), merge automático no login e cálculos centralizados estritamente na API.
+- **Checkout com Idempotência** — Formulário, seleção de carteira, cotação congelada e tratamento para estados de cotação expirada (`QUOTE_STALE`).
+- **Gestão de Pedidos** — Acompanhamento de status (pendente, confirmado, recusado) via push em tempo real e recibos detalhados com snapshot.
+- **Área do Usuário** — Fluxo de autenticação (login/cadastro), perfil de usuário e gerenciamento de carteiras principal e secundária.
+- **Responsividade Completa** — Layout adaptado para múltiplos viewports (Desktop 1440px, Tablet 768px e Mobile 390px).
+
+---
+
+## ⚙️ Engenharia em Evidência
+
+O cliente trata a API como autoridade absoluta. Preços, taxas, cupons e totais nunca são recalculados na UI.
+
+| Desafio Arquitetural | Solução Implementada |
 | --- | --- |
-| Favoritar não pode esperar a rede | **UX otimista** com rollback: o coração muda na hora; se a mutation falha, o cache volta e o toast avisa |
-| Clique repetido, timeout ou refresh no pagamento | **Idempotência no checkout**: a tentativa é persistida *antes* do `POST /orders`, com a mesma `Idempotency-Key` |
-| Preço ou estoque mudam enquanto o usuário navega | **Sincronização real-time** via Socket.IO (MSW): `nft.updated` / `order.updated`, dedupe por `eventId`, rejeição por `version` |
-| Avaliar falhas sem um backend de staging | **DevPanel (FAB)** no canto inferior direito, ligado a `window.__appSimulation` — inflação, sold-out, drop de socket, sessão e snapshot |
-
-Fluxo de dados, ponta a ponta:
-
-```
-rotas → componentes → hooks (Query) → services (schema.parse) → api/client → MSW
-```
-
-O mock é **server-authoritative**: o cliente envia intenções; o servidor simulado calcula preços, taxas e totais. ETH trafega como string decimal.
-
-Documentação de aprofundamento: [Arquitetura](docs/ARCHITECTURE.md) · [Decisões](docs/DECISIONS.md) · [Limitações conhecidas](docs/KNOWN_ISSUES.md)
+| **Favoritar sem latência** | **UX otimista** com rollback: o ícone muda imediatamente; se a mutação falha na rede, o cache é revertido e um toast notifica o usuário. |
+| **Prevenção de cobrança duplicada** | **Idempotência no checkout**: a tentativa de pagamento é persistida antes do `POST /orders`, garantindo a mesma `Idempotency-Key`. |
+| **Concorrência e tempo real** | **Sincronização via Socket.IO (MSW)**: eventos `nft.updated` e `order.updated` com deduplicação por `eventId` e rejeição de versões obsoletas. |
+| **Testes de cenários de borda** | **DevPanel (FAB)**: botão flutuante no canto inferior direito ligado a `window.__appSimulation` para injetar inflação, sold-out, drop de socket e falhas. |
 
 ---
 
-## O que a aplicação cobre
+## 🚀 Como Rodar Localmente
 
-- **Catálogo** — busca, filtros combináveis na URL, ordenação, paginação, estados de loading/vazio/erro
-- **Detalhe do NFT** — galeria, edição, quantidade limitada ao estoque, favoritos, compra
-- **Carrinho** — quantidade, remoção, cupom (`KURIO10` / `EXPIRADO`), merge no login, totais só da API
-- **Checkout** — formulário, carteira, cotação congelada, `QUOTE_STALE` com nova confirmação
-- **Pedido** — pendente → confirmado ou recusado via push; recibo com snapshot
-- **Conta** — login/cadastro, perfil (um único Salvar), carteiras principal e secundária
-- **Desktop e mobile** — 1440 / 768 / 390
-
----
-
-## Como rodar localmente
-
-Requisito: **Node 22+**.
+**Requisito prévio:** Node.js 22+.
 
 ```bash
+# Clone o repositório e acesse a pasta
+git clone https://github.com/alexalves011/frontend-challenge.git
+cd frontend-challenge
+
+# Instale as dependências
 npm install
-npx playwright install chromium   # só na primeira vez, para a suíte E2E
+
+# Instale os binários do Playwright (apenas na primeira vez, para os testes E2E)
+npx playwright install chromium
+
+# Inicie o ambiente de desenvolvimento
 npm run dev
 ```
 
-Abra [http://localhost:5173](http://localhost:5173). O MSW sobe **antes** do React; não é preciso API externa.
+Abra [http://localhost:5173](http://localhost:5173) no navegador. O MSW intercepta as requisições antes do React iniciar; nenhuma API externa é necessária.
 
-| Conta | E-mail | Senha |
-| --- | --- | --- |
-| Alice (carteiras seed) | `alice@kurio.dev` | `Kurio@123` |
-| Bob (sem carteiras) | `bob@kurio.dev` | `Kurio@123` |
+---
 
-Cupons: `KURIO10` (10%) e `EXPIRADO`.
+## 🔑 Contas de Acesso para Teste
 
-### Console de simulação
+| Usuário | E-mail | Senha | Observação |
+| --- | --- | --- | --- |
+| Alice | `alice@kurio.dev` | `Kurio@123` | Com carteiras seed |
+| Bob | `bob@kurio.dev` | `Kurio@123` | Sem carteiras |
 
-Com os mocks ativos, o FAB no canto inferior direito abre o DevPanel. Dali dá para injetar inflação, forçar sold-out, derrubar o socket, invalidar a sessão ou restaurar o snapshot inicial. O mesmo contrato está em `window.__appSimulation` (Playwright usa essa API).
+**Cupons de desconto:**
 
-Cenários também entram na URL: `?scenario=offline`, `payment-rejected`, `order-timeout`, etc.
+- `KURIO10` — 10% de desconto (válido)
+- `EXPIRADO` — para testar o tratamento de cupom inválido
 
-### Scripts
+---
 
-| Comando | Função |
+## 📚 Documentação Técnica
+
+Para uma visão aprofundada das decisões de engenharia, arquitetura e limitações mapeadas, consulte a pasta [`docs/`](./docs):
+
+- [`ARCHITECTURE.md`](./docs/ARCHITECTURE.md) — Topologia do frontend, fluxo de dados ponta a ponta e papel do MSW.
+- [`DECISIONS.md`](./docs/DECISIONS.md) — Decisões de design (ADRs), escolhas de bibliotecas e estratégias de validação com Zod.
+- [`KNOWN_ISSUES.md`](./docs/KNOWN_ISSUES.md) — Comportamentos conhecidos de concorrência e detalhes sobre o ciclo de vida do navegador (como o bfcache).
+
+---
+
+## 🛠️ Scripts Disponíveis
+
+| Comando | Descrição |
 | --- | --- |
-| `npm run dev` | Vite + MSW |
-| `npm run build` | Gera o route tree, typecheck e bundle |
-| `npm run typecheck` | `tsc -b` |
-| `npm run lint` | oxlint em `src/` |
-| `npm test` | Vitest (domínio ETH / mock) |
-| `npm run test:e2e` | Playwright nos viewports 390, 768 e 1440 |
+| `npm run dev` | Inicia o servidor Vite com os mocks do MSW ativos |
+| `npm run build` | Gera o route tree, faz typecheck e empacota o bundle de produção |
+| `npm run typecheck` | Executa a verificação estática de tipos (`tsc -b`) |
+| `npm run lint` | Roda o linter oxlint em `src/` |
+| `npm test` | Executa os testes unitários com Vitest |
+| `npm run test:e2e` | Roda a suíte E2E com Playwright (viewports 390, 768 e 1440) |
 
-Para desligar o mock (backend real): `VITE_ENABLE_MOCKS=false`.
-
----
-
-## Testes
-
-A suíte E2E cobre catálogo, auth, favoritos (otimista + rollback), carrinho, compra, falhas de pagamento, realtime e a11y/loading. Três projetos Playwright: **mobile 390**, **tablet 768**, **desktop 1440**.
-
-As baselines visuais versionadas são `linux` e `darwin`. Em Windows, use `npm run test:e2e:docker` para comparar contra `*-linux.png`.
+> **Nota:** para rodar a aplicação sem os mocks e conectar a um backend real, defina a variável `VITE_ENABLE_MOCKS=false`.
 
 ---
 
-O layout segue o [Figma do desafio](https://www.figma.com/design/Ff0SksUi7UFtPWUO8kyNtw/Frontend-Challenge?node-id=0-1). O enunciado original está em [`CHALLENGE.md`](CHALLENGE.md).
+## ☁️ Deploy e Infraestrutura
+
+O projeto está configurado para deploy contínuo integrado diretamente com a Vercel:
+
+- **Configuração de rotas (`vercel.json`)** — Contém as regras de *rewrites* que direcionam todas as rotas (`/(.*)`) para o `index.html`, garantindo que o TanStack Router gerencie o histórico sem erros 404 ao atualizar a página.
+- **Zero configuração de ambiente** — Como todo o banco de dados simulado roda via MSW no lado do cliente (`localStorage`), nenhuma variável de ambiente é necessária no painel da Vercel.
+- **Integração contínua (CI)** — A pasta `.github/workflows/` contém pipelines automatizados para execução de typecheck, lint, build e testes E2E do Playwright.
