@@ -3,6 +3,7 @@ import { createRootRouteWithContext, Link, Outlet, useRouter } from '@tanstack/r
 import { useEffect } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { AuthDialog } from '@/components/auth/AuthDialog'
 import { Footer } from '@/components/layout/Footer'
 import { Header } from '@/components/layout/Header'
 import { MobileTabBar } from '@/components/layout/MobileTabBar'
@@ -26,6 +27,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootLayout() {
   useSessionExpiry()
+  const { auth, redirect } = Route.useSearch()
 
   return (
     <>
@@ -38,6 +40,7 @@ function RootLayout() {
       </main>
       <Footer />
       <MobileTabBar />
+      {auth && <AuthDialog mode={auth} redirect={redirect} />}
       <Toaster position="top-right" richColors closeButton />
     </>
   )
