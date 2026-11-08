@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { AuthDialog } from '@/components/auth/AuthDialog'
+import { DevPanel } from '@/components/layout/DevPanel'
 import { Footer } from '@/components/layout/Footer'
 import { Header } from '@/components/layout/Header'
 import { MobileTabBar } from '@/components/layout/MobileTabBar'
@@ -13,6 +14,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { clearSession } from '@/hooks/useSession'
 import { redirectSearchSchema } from '@/lib/redirect'
 import { sessionEvents } from '@/lib/session-events'
+import { useRealtimeSync } from '@/realtime/useRealtimeSync'
 
 /** `?auth=login|signup` abre o diálogo sobre qualquer página; `redirect` é o destino pós-login. */
 const rootSearchSchema = redirectSearchSchema.extend({
@@ -26,6 +28,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 })
 
 function RootLayout() {
+  useRealtimeSync()
   useSessionExpiry()
   const { auth, redirect } = Route.useSearch()
 
@@ -42,6 +45,7 @@ function RootLayout() {
       <MobileTabBar />
       {auth && <AuthDialog mode={auth} redirect={redirect} />}
       <Toaster position="top-right" richColors closeButton />
+      <DevPanel />
     </>
   )
 }
