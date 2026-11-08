@@ -28,8 +28,8 @@ export function Header() {
   }
 
   return (
-    <header className="hidden border-b border-border md:block">
-      <div className="mx-auto flex h-[69px] max-w-[1200px] items-center justify-between px-6 xl:px-0">
+    <header className="hidden md:block">
+      <div className="mx-auto flex h-[69px] max-w-[1200px] items-center justify-between border-b border-border px-6 xl:px-0">
         <Link to="/" className="text-sm font-bold tracking-[0.2em]" aria-label="Kurio, página inicial">
           KURIO
         </Link>

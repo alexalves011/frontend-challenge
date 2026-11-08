@@ -79,7 +79,7 @@ export async function logout(page: Page) {
 /** Espera o socket.io-client conectar ao servidor simulado (opcionalmente como um usuário). */
 export async function waitForSocket(page: Page, userId?: string) {
   await page.waitForFunction((id) => {
-    const users = window.__kurioMock?.connectedUsers() ?? []
+    const users = window.__appSimulation?.connectedUsers() ?? []
     return id ? users.includes(id) : users.length > 0
   }, userId)
 }

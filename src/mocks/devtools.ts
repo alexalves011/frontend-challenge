@@ -7,7 +7,7 @@ import { getScenario, SCENARIOS, setScenario, type ScenarioId } from './scenario
 import { connectedUsers, deliverRaw, dropConnections, redeliverLastEvent } from './socket'
 
 /**
- * Controles do "servidor" simulado para DevPanel e Playwright. Tudo passa pelo db e
+ * Controles do "servidor" simulado para DevPanel, window.__appSimulation e Playwright. Tudo passa pelo db e
  * pelo transporte Socket.IO mockado — nada mexe direto na UI ou no cache do cliente.
  */
 const mockControls = {
@@ -63,10 +63,10 @@ type MockControls = typeof mockControls
 
 declare global {
   interface Window {
-    __kurioMock?: MockControls
+    __appSimulation?: MockControls
   }
 }
 
 export function installDevtools() {
-  window.__kurioMock = mockControls
+  window.__appSimulation = mockControls
 }

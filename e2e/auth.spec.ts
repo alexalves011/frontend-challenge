@@ -41,7 +41,7 @@ test('login inválido, retorno ao fluxo anterior e logout', async ({ page }) => 
 test('sessão expirada durante a navegação volta ao login preservando o destino', async ({ page }) => {
   await login(page, ALICE, '/wallets')
   await expect(page).toHaveURL(/\/wallets/)
-  await page.evaluate(() => window.__kurioMock?.expireSessions())
+  await page.evaluate(() => window.__appSimulation?.expireSessions())
   await page.goto('/profile')
   await expect(page).toHaveURL(/auth=login&redirect=%2Fprofile/)
 })
@@ -67,5 +67,5 @@ test('troca de usuário não expõe dados do anterior', async ({ page }) => {
   await expect(page).toHaveURL(/\/wallets/)
   await expect(page.getByLabel(/^Nome de exibição/).first()).toBeVisible()
   await expect(page.getByLabel(/^Apelido da carteira/).first()).toHaveValue('')
-  expect(await page.evaluate(() => window.__kurioMock?.connectedUsers())).toEqual(['u_bob'])
+  expect(await page.evaluate(() => window.__appSimulation?.connectedUsers())).toEqual(['u_bob'])
 })

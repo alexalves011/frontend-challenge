@@ -25,7 +25,7 @@ test('compra completa do catálogo ao recibo confirmado', async ({ page }) => {
 
   // carrinho perde apenas o que foi comprado; recibo é snapshot e sobrevive a mudança de preço
   const url = page.url()
-  await page.evaluate(() => window.__kurioMock?.changePrice('emerald-ape-042', '1/50', '9.99'))
+  await page.evaluate(() => window.__appSimulation?.changePrice('emerald-ape-042', '1/50', '9.99'))
   await page.goto(url)
   await expect(page.getByText('1.206 ETH').first()).toBeVisible()
   await page.goto('/cart')
